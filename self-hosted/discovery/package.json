@@ -1,0 +1,37 @@
+{
+  "name": "workload-discovery-discovery",
+  "version": "1.0.0",
+  "description": "Discovery component for self-hosted Workload Discovery on AWS",
+  "main": "index.mjs",
+  "type": "module",
+  "scripts": {
+    "start": "node index.mjs"
+  },
+  "dependencies": {
+    "@aws-sdk/client-api-gateway": "^3.405.0",
+    "@aws-sdk/client-appsync": "^3.405.0",
+    "@aws-sdk/client-config-service": "^3.405.0",
+    "@aws-sdk/client-ec2": "^3.405.0",
+    "@aws-sdk/client-ecs": "^3.405.0",
+    "@aws-sdk/client-eks": "^3.405.0",
+    "@aws-sdk/client-elastic-load-balancing": "^3.405.0",
+    "@aws-sdk/client-elastic-load-balancing-v2": "^3.405.0",
+    "@aws-sdk/client-iam": "^3.405.0",
+    "@aws-sdk/client-lambda": "^3.405.0",
+    "@aws-sdk/client-mediaconnect": "^3.405.0",
+    "@aws-sdk/client-opensearch": "^3.405.0",
+    "@aws-sdk/client-organizations": "^3.405.0",
+    "@aws-sdk/client-service-catalog-appregistry": "^3.405.0",
+    "@aws-sdk/client-sns": "^3.405.0",
+    "@aws-sdk/client-sts": "^3.405.0",
+    "@aws-sdk/credential-providers": "^3.405.0",
+    "@smithy/util-retry": "^1.0.5",
+    "async-retry": "^1.3.3",
+    "aws4": "^1.12.0",
+    "neo4j-driver": "^5.15.0",
+    "node-fetch": "^3.3.2",
+    "p-throttle": "^5.0.0",
+    "ramda": "^0.29.1",
+    "undici": "^5.26.0"
+  }
+} 

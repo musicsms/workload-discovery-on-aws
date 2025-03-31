@@ -1,0 +1,17 @@
+{
+  "name": "workload-discovery-graphql-server",
+  "version": "1.0.0",
+  "description": "GraphQL server for self-hosted Workload Discovery on AWS",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "apollo-server": "^3.12.1",
+    "graphql": "^16.8.1",
+    "neo4j-driver": "^5.15.0",
+    "neo4j-graphql-js": "^3.22.1",
+    "ramda": "^0.29.1"
+  }
+} 

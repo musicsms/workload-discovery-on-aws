@@ -1,0 +1,103 @@
+version: '3'
+
+services:
+  # Neo4j as a replacement for Amazon Neptune (graph database)
+  neo4j:
+    image: neo4j:4.4
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      - NEO4J_AUTH=neo4j/password
+      - NEO4J_dbms_memory_heap_max__size=4G
+    volumes:
+      - neo4j_data:/data
+
+  # GraphQL API server (replacing AWS AppSync)
+  graphql-api:
+    build:
+      context: ./graphql-server
+    ports:
+      - "4000:4000"
+    environment:
+      - DB_HOST=neo4j
+      - DB_PORT=7687
+      - DB_USER=neo4j
+      - DB_PASS=password
+      - PORT=4000
+    depends_on:
+      - neo4j
+
+  # MinIO (replacing S3)
+  minio:
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  # Create MinIO buckets on startup
+  minio-setup:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      sleep 5;
+      /usr/bin/mc config host add myminio http://minio:9000 minioadmin minioadmin;
+      /usr/bin/mc mb myminio/workload-discovery-ui;
+      /usr/bin/mc mb myminio/workload-discovery-diagrams;
+      /usr/bin/mc policy set public myminio/workload-discovery-ui;
+      exit 0;
+      "
+      
+  # Web UI
+  web-ui:
+    build:
+      context: ./web-ui
+    ports:
+      - "3000:80"
+    volumes:
+      - ./settings.js:/usr/share/nginx/html/settings.js
+    depends_on:
+      - graphql-api
+      - minio
+
+  # Discovery container (modified to work with Neo4j instead of Neptune)
+  discovery:
+    build:
+      context: ./discovery
+    volumes:
+      # Mount the AWS credentials directory from the host
+      - ~/.aws:/root/.aws:ro
+    environment:
+      # No static credentials - use credentials provider chain
+      - AWS_REGION=${AWS_REGION:-us-east-1}
+      - AWS_PROFILE=${AWS_PROFILE:-default}
+      - AWS_SDK_LOAD_CONFIG=1
+      - GRAPHQL_API_URL=http://graphql-api:4000/graphql
+      - CONFIG_AGGREGATOR=${CONFIG_AGGREGATOR}
+      - VPC_ID=${VPC_ID}
+      - CUSTOM_USER_AGENT=workload-discovery-on-aws-self-hosted
+      - LOG_LEVEL=INFO
+      - DB_HOST=neo4j
+      - DB_PORT=7687
+      - DB_USER=neo4j
+      - DB_PASS=password
+    depends_on:
+      - graphql-api
+      - neo4j
+
+volumes:
+  neo4j_data:
+  minio_data: 
